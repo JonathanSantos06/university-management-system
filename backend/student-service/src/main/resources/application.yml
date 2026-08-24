@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: student-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sgu
+    username: sgu_user
+    password: sgu_pass
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: student
+        format_sql: false
+    show-sql: false
+  jackson:
+    default-property-inclusion: non_null
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Misma clave HMAC que auth-service: este servicio NO emite tokens, solo los valida.
+sgu:
+  jwt:
+    secret: ${JWT_SECRET:c2d1LWRlbW8tc2VjcmV0LWtleS1jaGFuZ2UtbWUtaW4tcHJvZHVjdGlvbi1wbGVhc2UtMjU2Yml0cw==}
+    issuer: sgu-auth-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    mx.edu.sgu.student: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://postgres:5432/sgu
+    username: sgu_user
+    password: sgu_pass

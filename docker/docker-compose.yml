@@ -1,0 +1,58 @@
+
+x-spring-common: &spring-common
+  environment:
+    SPRING_PROFILES_ACTIVE: docker
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sgu
+    SPRING_DATASOURCE_USERNAME: sgu_user
+    SPRING_DATASOURCE_PASSWORD: sgu_pass
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    - sgu-net
+
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: sgu-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sgu
+      POSTGRES_USER: sgu_user
+      POSTGRES_PASSWORD: sgu_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ../sql/catalogs.sql:/docker-entrypoint-initdb.d/02-catalogs.sql
+      - ../sql/data.sql:/docker-entrypoint-initdb.d/03-data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sgu_user -d sgu"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sgu-net
+
+  auth-service:
+    build:
+      context: ../backend/auth-service
+    container_name: sgu-auth-service
+    <<: *spring-common
+    ports:
+      - "8081:8080"
+
+  
+  
+
+  
+networks:
+  sgu-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  documents-storage:
