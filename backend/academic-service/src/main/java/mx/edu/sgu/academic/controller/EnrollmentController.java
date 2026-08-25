@@ -61,6 +61,13 @@ public class EnrollmentController {
         return ResponseEntity.ok(kardexService.build(studentId));
     }
 
+    @GetMapping("/api/enrollments/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')")
+    @Operation(summary = "Cuenta inscripciones por estatus (usado por admin-service para dashboards)")
+    public ResponseEntity<Long> countByStatus(@RequestParam Enrollment.EnrollmentStatus status) {
+        return ResponseEntity.ok(enrollmentService.countByStatus(status));
+    }
+
     @PatchMapping("/api/enrollments/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')")
     @Operation(summary = "Cambia el estatus de la inscripción (ACTIVA, CERRADA, CANCELADA)")

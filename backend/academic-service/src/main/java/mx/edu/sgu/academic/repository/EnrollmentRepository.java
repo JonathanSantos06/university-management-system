@@ -14,4 +14,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
     Optional<Enrollment> findByStudentIdAndAcademicPeriodId(UUID studentId, UUID academicPeriodId);
 
     boolean existsByStudentIdAndAcademicPeriodId(UUID studentId, UUID academicPeriodId);
+
+    long countByStatus(mx.edu.sgu.academic.domain.Enrollment.EnrollmentStatus status);
 }

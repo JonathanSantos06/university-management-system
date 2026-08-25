@@ -110,6 +110,11 @@ public class EnrollmentService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public long countByStatus(Enrollment.EnrollmentStatus status) {
+        return enrollmentRepository.countByStatus(status);
+    }
+
     Enrollment getOrThrow(UUID id) {
         return enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inscripción no encontrada: " + id));

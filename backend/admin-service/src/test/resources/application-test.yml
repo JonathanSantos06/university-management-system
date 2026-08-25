@@ -1,0 +1,9 @@
+sgu:
+  jwt:
+    secret: dGVzdC1zZWNyZXQta2V5LWZvci1qdW5pdC10ZXN0cy1vbmx5LTI1NmJpdHMh
+    issuer: sgu-auth-service-test
+  services:
+    student-service-url: http://localhost:19082
+    academic-service-url: http://localhost:19083
+    document-service-url: http://localhost:19084
+    request-timeout-ms: 2000

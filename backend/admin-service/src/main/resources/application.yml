@@ -3,22 +3,9 @@ server:
 
 spring:
   application:
-    name: academic-service
+    name: admin-service
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
-  datasource:
-    url: jdbc:postgresql://localhost:5432/sgu
-    username: sgu_user
-    password: sgu_pass
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        default_schema: academic
-        format_sql: false
-    show-sql: false
   jackson:
     default-property-inclusion: non_null
 
@@ -33,9 +20,11 @@ sgu:
   jwt:
     secret: ${JWT_SECRET:c2d1LWRlbW8tc2VjcmV0LWtleS1jaGFuZ2UtbWUtaW4tcHJvZHVjdGlvbi1wbGVhc2UtMjU2Yml0cw==}
     issuer: sgu-auth-service
-  academic:
-    passing-grade: 6.0
-    final-partial-number: 4
+  services:
+    student-service-url: ${STUDENT_SERVICE_URL:http://localhost:8082}
+    academic-service-url: ${ACADEMIC_SERVICE_URL:http://localhost:8083}
+    document-service-url: ${DOCUMENT_SERVICE_URL:http://localhost:8084}
+    request-timeout-ms: 4000
 
 management:
   endpoints:
@@ -45,14 +34,16 @@ management:
 
 logging:
   level:
-    mx.edu.sgu.academic: INFO
+    mx.edu.sgu.admin: INFO
 
 ---
 spring:
   config:
     activate:
       on-profile: docker
-  datasource:
-    url: jdbc:postgresql://postgres:5432/sgu
-    username: sgu_user
-    password: sgu_pass
+
+sgu:
+  services:
+    student-service-url: http://student-service:8080
+    academic-service-url: http://academic-service:8080
+    document-service-url: http://document-service:8080
