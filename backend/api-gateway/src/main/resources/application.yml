@@ -1,0 +1,105 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        # --- document-service: rutas específicas primero (más prioritarias) ---
+        - id: document-service-student-docs
+          uri: ${SGU_DOCUMENT_SERVICE_URI:http://localhost:8084}
+          order: 1
+          predicates:
+            - Path=/api/students/*/documents/**
+
+        - id: document-service-kardex-pdf
+          uri: ${SGU_DOCUMENT_SERVICE_URI:http://localhost:8084}
+          order: 2
+          predicates:
+            - Path=/api/students/*/kardex/pdf
+
+        - id: document-service-generic
+          uri: ${SGU_DOCUMENT_SERVICE_URI:http://localhost:8084}
+          order: 3
+          predicates:
+            - Path=/api/documents/**,/api/document-types/**
+
+        # --- academic-service: rutas de alumno específicas antes que las genéricas ---
+        - id: academic-service-student-enrollments
+          uri: ${SGU_ACADEMIC_SERVICE_URI:http://localhost:8083}
+          order: 4
+          predicates:
+            - Path=/api/students/*/enrollments
+
+        - id: academic-service-student-kardex
+          uri: ${SGU_ACADEMIC_SERVICE_URI:http://localhost:8083}
+          order: 5
+          predicates:
+            # Sin /** al final: NO debe capturar /kardex/pdf (esa la atiende document-service arriba)
+            - Path=/api/students/*/kardex
+
+        - id: academic-service-generic
+          uri: ${SGU_ACADEMIC_SERVICE_URI:http://localhost:8083}
+          order: 6
+          predicates:
+            - Path=/api/careers/**,/api/subjects/**,/api/academic-periods/**,/api/enrollments/**,/api/enrollment-subjects/**
+
+        # --- admin-service ---
+        - id: admin-service
+          uri: ${SGU_ADMIN_SERVICE_URI:http://localhost:8085}
+          order: 7
+          predicates:
+            - Path=/api/admin/**
+
+        # --- student-service: catch-all de /api/students/** (debe ir después de las
+        #     rutas más específicas de document-service y academic-service de arriba) ---
+        - id: student-service
+          uri: ${SGU_STUDENT_SERVICE_URI:http://localhost:8082}
+          order: 8
+          predicates:
+            - Path=/api/students/**
+
+        # --- auth-service ---
+        - id: auth-service
+          uri: ${SGU_AUTH_SERVICE_URI:http://localhost:8081}
+          order: 9
+          predicates:
+            - Path=/api/auth/**,/api/users/**,/api/roles/**
+
+management:
+  endpoint:
+    gateway:
+      access: read-only
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    mx.edu.sgu.gateway: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+SGU_AUTH_SERVICE_URI: http://auth-service:8080
+SGU_STUDENT_SERVICE_URI: http://student-service:8080
+SGU_ACADEMIC_SERVICE_URI: http://academic-service:8080
+SGU_DOCUMENT_SERVICE_URI: http://document-service:8080
+SGU_ADMIN_SERVICE_URI: http://admin-service:8080
