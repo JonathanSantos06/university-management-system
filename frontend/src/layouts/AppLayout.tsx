@@ -6,7 +6,7 @@ import {
 import SchoolIcon from "@mui/icons-material/School";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../mock/authContext";
+import { useAuth } from "../context/AuthContext";
 
 const drawerWidth = 250;
 
@@ -65,10 +65,10 @@ export const AppLayout: React.FC<{ items: NavItem[]; title: string; children: Re
           <Toolbar sx={{ justifyContent: "space-between" }}>
             <Typography variant="h6" color="text.primary">{title}</Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Chip label={user?.role ?? ""} size="small" color="secondary" />
-              <Typography variant="body2" color="text.secondary">{user?.fullName}</Typography>
+              <Chip label={user?.roles ?? ""} size="small" color="secondary" />
+              <Typography variant="body2" color="text.secondary">{user?.username}</Typography>
               <Avatar sx={{ width: 32, height: 32, bgcolor: "#0B3D91" }}>
-                {user?.fullName?.charAt(0) ?? "U"}
+                {user?.username?.charAt(0) ?? "U"}
               </Avatar>
               <IconButton onClick={() => { logout(); navigate("/login"); }} title="Cerrar sesión">
                 <LogoutIcon />
